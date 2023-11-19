@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Formulario extends StatefulWidget {
-  const Formulario({super.key});
+  const Formulario({Key? key});
 
   @override
   State<StatefulWidget> createState() {
@@ -10,129 +14,167 @@ class Formulario extends StatefulWidget {
 }
 
 class FormularioState extends State<Formulario> {
-  String _sexoSelecionado = "M";
-  bool _webSelecionado = false, _mobileSelecionado = false;
-  List<String> _listaSelecionados = [];
-  double _idade = 25;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _dobController =
+      TextEditingController(); // Campo para data de nascimento
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  Future getImageFromCamera() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    setState(() {
+      _image = File(pickedFile!.path);
+    });
+  }
+
+  Future getImageFromGallery() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = File(pickedFile!.path);
+    });
+  }
+
+  void saveProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('name', _nameController.text);
+    prefs.setString('cpf', _cpfController.text);
+    prefs.setString('email', _emailController.text);
+    prefs.setString('phone', _phoneController.text);
+    prefs.setString(
+        'dob', _dobController.text); // Salvando a data de nascimento
+    // Save or update image to preferences or local storage as needed
+  }
+
+  Future<void> sendEmail() async {
+    final Uri _emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: _emailController.text,
+      queryParameters: {'subject': 'Subject', 'body': 'Body'},
+    );
+    try {
+      if (await canLaunch(_emailLaunchUri.toString())) {
+        await launch(_emailLaunchUri.toString());
+      } else {
+        throw 'Could not launch email';
+      }
+    } catch (e) {
+      print('Error launching email: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Padding(
-            padding: const EdgeInsets.all(30),
-            child: SingleChildScrollView(
-                // Serve para adicionar Scroll
-                child: Column(children: [
-              TextField(
-                keyboardType: TextInputType.name,
-                decoration: const InputDecoration(
-                    hintText: "Seu nome", prefixIcon: const Icon(Icons.person)),
-              ),
-              const SizedBox(height: 15),
-              TextFormField(
-                  maxLines: 5,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.article),
-                      hintText: "Sobre você",
-                      border: OutlineInputBorder())),
-              const SizedBox(height: 15),
-              TextFormField(
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.phone),
-                      hintText: "Telefone",
-                      border: OutlineInputBorder())),
-              const SizedBox(height: 15),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.email),
-                    hintText: "E-mail",
-                    border: OutlineInputBorder()),
-              ),
-              const SizedBox(height: 15),
-              DropdownButtonFormField(
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Cidade",
-                      prefixIcon: Icon(Icons.location_city)),
-                  items: const [
-                    DropdownMenuItem(
-                        value: "Londrina", child: Text("Londrina-PR")),
-                    DropdownMenuItem(value: "Cambé", child: Text("Cambé-PR")),
-                    DropdownMenuItem(
-                        value: "Rolândia", child: Text("Rolândia-PR"))
-                  ],
-                  onChanged: (value) => {print(value)}),
-              const SizedBox(height: 15),
-              Column(children: [
-                ListTile(
-                    title: const Text("Masculino"),
-                    leading: Radio(
-                        value: "M",
-                        groupValue: _sexoSelecionado,
-                        onChanged: (value) {
-                          setState(() {
-                            _sexoSelecionado = value!;
-                          });
-                        })),
-                ListTile(
-                    title: const Text("Feminino"),
-                    leading: Radio(
-                        value: "F",
-                        groupValue: _sexoSelecionado,
-                        onChanged: (value) {
-                          setState(() {
-                            //value = null;
-                            _sexoSelecionado = value ?? "F";
-                          });
-                        }))
-              ]),
-              const Divider(),
-              Column(children: [
-                ListTile(
-                    title: const Text("Desenvolvimento web"),
-                    leading: Checkbox(
-                        value: _webSelecionado,
-                        onChanged: (value) {
-                          setState(() {
-                            _webSelecionado = value!;
-                            (_webSelecionado)
-                                ? _listaSelecionados.add("web")
-                                : _listaSelecionados.remove("web");
-                            print(_listaSelecionados);
-                          });
-                        })),
-                ListTile(
-                  title: const Text("Desenvolvimento mobile"),
-                  leading: Checkbox(
-                    value: _mobileSelecionado,
-                    onChanged: (value) {
-                      setState(() {
-                        _mobileSelecionado = value!;
-                        (_mobileSelecionado)
-                            ? _listaSelecionados.add("mobile")
-                            : _listaSelecionados.remove("mobile");
-                        print(_listaSelecionados);
-                      });
+      appBar: AppBar(
+        title: Text('Perfil do Usuário'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: saveProfileData,
+          ),
+          IconButton(
+            icon: Icon(Icons.email),
+            onPressed: sendEmail,
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(30),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SafeArea(
+                        child: Container(
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.photo_camera),
+                                title: Text('Câmera'),
+                                onTap: () {
+                                  getImageFromCamera();
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.photo_library),
+                                title: Text('Galeria'),
+                                onTap: () {
+                                  getImageFromGallery();
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
-                  ),
-                )
-              ]),
-              const Divider(),
-              Slider(
-                value: _idade,
-                min: 0,
-                max: 120,
-                divisions: 120,
-                label: "Idade ${_idade.round()}",
-                onChanged: (value) {
-                  setState(() {
-                    _idade = value;
-                  });
+                  );
                 },
-              )
-            ]))));
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _image != null ? FileImage(_image!) : null,
+                  child:
+                      _image == null ? Icon(Icons.camera_alt, size: 50) : null,
+                ),
+              ),
+              TextField(
+                controller: _nameController,
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  hintText: 'Seu nome',
+                  prefixIcon: Icon(Icons.person),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: _cpfController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'CPF',
+                  prefixIcon: Icon(Icons.article),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'Telefone',
+                  prefixIcon: Icon(Icons.phone),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'E-mail',
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: _dobController,
+                keyboardType: TextInputType.datetime,
+                decoration: InputDecoration(
+                  hintText: 'Data de Nascimento',
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+              ),
+              SizedBox(height: 15),
+              // Restante dos campos do formulário...
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

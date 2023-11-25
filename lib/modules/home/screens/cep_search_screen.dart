@@ -20,9 +20,12 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
       Placemark placemark = placemarks.first;
       setState(() {
         _currentAddress =
@@ -34,9 +37,11 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
   }
 
   void _compareAddresses() {
-    String address = _cepController.text.trim();
-    if (_currentAddress != null && address.isNotEmpty) {
-      if (_currentAddress == address) {
+    String addressFromCep = _addressData?.logradouro ?? '';
+    String addressFromGPS = _currentAddress ?? '';
+
+    if (addressFromCep.isNotEmpty && addressFromGPS.isNotEmpty) {
+      if (addressFromCep == addressFromGPS) {
         _showModal('Você está na mesma localização do CEP digitado');
       } else {
         _showModal('Você não está na mesma localização do CEP digitado');
@@ -84,12 +89,19 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       return;
     }
 
-    String mapsUrl = 'https://www.google.com.br/maps/place/$address';
     try {
-      if (await canLaunch(mapsUrl)) {
-        await launch(mapsUrl);
+      List<Location> locations = await locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        Location location = locations.first;
+        String mapsUrl =
+            'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}';
+        if (await canLaunch(mapsUrl)) {
+          await launch(mapsUrl);
+        } else {
+          throw 'Não foi possível abrir o Google Maps';
+        }
       } else {
-        throw 'Não foi possível abrir o Google Maps';
+        throw 'Endereço não encontrado';
       }
     } catch (e) {
       print('Erro ao abrir o Google Maps: $e');
@@ -119,7 +131,10 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _abrirGoogleMaps,
+              onPressed: () async {
+                _getCurrentLocation();
+                _abrirGoogleMaps();
+              },
               child: Text('Abrir no Google Maps'),
             ),
             SizedBox(height: 20),

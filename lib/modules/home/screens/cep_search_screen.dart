@@ -17,6 +17,37 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
   Cep? _addressData;
   String? _currentAddress;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLocationPermission();
+  }
+
+  Future<void> _checkLocationPermission() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw 'Serviço de localização desabilitado';
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw 'Permissões de localização negadas';
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw 'Permissões de localização negadas permanentemente';
+      }
+
+      _getCurrentLocation();
+    } catch (e) {
+      print('Erro ao verificar permissões de localização: $e');
+    }
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -95,11 +126,9 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
         Location location = locations.first;
         String mapsUrl =
             'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}';
-        if (await canLaunch(mapsUrl)) {
-          await launch(mapsUrl);
-        } else {
-          throw 'Não foi possível abrir o Google Maps';
-        }
+
+        // Tentativa direta de abrir o Google Maps
+        await launch(mapsUrl);
       } else {
         throw 'Endereço não encontrado';
       }
@@ -132,8 +161,7 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                _getCurrentLocation();
-                _abrirGoogleMaps();
+                await _abrirGoogleMaps();
               },
               child: Text('Abrir no Google Maps'),
             ),

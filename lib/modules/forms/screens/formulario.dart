@@ -18,8 +18,7 @@ class FormularioState extends State<Formulario> {
   final TextEditingController _cpfController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _dobController =
-      TextEditingController(); // Campo para data de nascimento
+  final TextEditingController _dobController = TextEditingController();
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
@@ -43,16 +42,14 @@ class FormularioState extends State<Formulario> {
     prefs.setString('cpf', _cpfController.text);
     prefs.setString('email', _emailController.text);
     prefs.setString('phone', _phoneController.text);
-    prefs.setString(
-        'dob', _dobController.text); // Salvando a data de nascimento
-    // Save or update image to preferences or local storage as needed
+    prefs.setString('dob', _dobController.text);
   }
 
   Future<void> sendEmail() async {
     final Uri _emailLaunchUri = Uri(
       scheme: 'mailto',
       path: _emailController.text,
-      queryParameters: {'subject': 'Subject', 'body': 'Body'},
+      queryParameters: {'subject': 'Assunto', 'body': 'Corpo do e-mail'},
     );
     try {
       if (await canLaunch(_emailLaunchUri.toString())) {
@@ -72,12 +69,12 @@ class FormularioState extends State<Formulario> {
         title: Text('Perfil do Usuário'),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
-            onPressed: saveProfileData,
-          ),
-          IconButton(
             icon: Icon(Icons.email),
             onPressed: sendEmail,
+          ),
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: saveProfileData,
           ),
         ],
       ),
@@ -170,7 +167,6 @@ class FormularioState extends State<Formulario> {
                 ),
               ),
               SizedBox(height: 15),
-              // Restante dos campos do formulário...
             ],
           ),
         ),

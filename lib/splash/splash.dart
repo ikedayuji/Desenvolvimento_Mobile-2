@@ -14,59 +14,49 @@ class SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
-    Timer(
-      const Duration(seconds: 3),
-      () {
-        Navigator.pop(context);
-        Navigator.push(
-          context, 
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pop(context);
+      Navigator.push(
+          context,
           MaterialPageRoute(
-            //builder: (context) => TopBar()
-            builder: (context) => BottomBar()
-          )
-        );
-      }
-    );
+              //builder: (context) => TopBar()
+              builder: (context) => BottomBar()));
+    });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          color: Colors.black87,
-          gradient: LinearGradient(
-            colors: [
-              Colors.deepPurple,
-              Colors.blueAccent,
-              Colors.cyanAccent
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight
-          ),
-          /*RadialGradient(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+            height: double.infinity,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.black87,
+              gradient: LinearGradient(colors: [
+                Color.fromARGB(255, 64, 189, 26),
+                Color.fromARGB(255, 230, 255, 10),
+                Color.fromARGB(255, 0, 247, 255)
+              ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              /*RadialGradient(
             colors: [
               Colors.yellowAccent,
               Colors.yellow,
               Colors.red
             ]
           ),*/
-          // Imagem de fundo
-          /*image: DecorationImage(
+              // Imagem de fundo
+              /*image: DecorationImage(
             image: AssetImage("./assets/images/fundo.jpg")
           )*/
-        ),
-        /* Se estiver executando na Web (Chrome) */
-        //child: Image.asset("/images/computer.png")
-        /* Se estiver executando no Emulador Android */
-        /*child: Image.asset(
+            ),
+            /* Se estiver executando na Web (Chrome) */
+            //child: Image.asset("/images/computer.png")
+            /* Se estiver executando no Emulador Android */
+            /*child: Image.asset(
           "./assets/images/computer.png"
         )*/
-        child: Lottie.asset("./assets/images/animacao.json")
-      )
-    );
+            child:
+                Lottie.asset("./assets/images/Animacao_de_carregamento.json")));
   }
 }

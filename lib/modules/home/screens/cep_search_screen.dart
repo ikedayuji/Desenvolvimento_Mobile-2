@@ -41,8 +41,6 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       if (permission == LocationPermission.deniedForever) {
         throw 'Permissões de localização negadas permanentemente';
       }
-
-      _getCurrentLocation();
     } catch (e) {
       print('Erro ao verificar permissões de localização: $e');
     }
@@ -61,6 +59,7 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       setState(() {
         _currentAddress =
             '${placemark.thoroughfare}, ${placemark.subThoroughfare}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
+        _compareAddresses();
       });
     } catch (e) {
       print('Erro ao obter localização: $e');
@@ -68,14 +67,13 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
   }
 
   void _compareAddresses() {
-    String addressFromCep = _addressData?.logradouro ?? '';
-    String addressFromGPS = _currentAddress ?? '';
-
-    if (addressFromCep.isNotEmpty && addressFromGPS.isNotEmpty) {
-      if (addressFromCep == addressFromGPS) {
-        _showModal('Você está na mesma localização do CEP digitado');
-      } else {
-        _showModal('Você não está na mesma localização do CEP digitado');
+    if (_addressData != null && _currentAddress != null) {
+      String addressFromCep = _addressData!.logradouro ?? '';
+      String formattedCurrentAddress = _currentAddress!.replaceAll(', ', ',');
+      if (addressFromCep.isNotEmpty && formattedCurrentAddress.isNotEmpty) {
+        if (addressFromCep == formattedCurrentAddress) {
+          _showModal('Você está na mesma localização do CEP digitado');
+        }
       }
     }
   }
@@ -108,6 +106,7 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       Cep cepData = await CepRepository().fetchCep(cep);
       setState(() {
         _addressData = cepData;
+        _getCurrentLocation();
       });
     } catch (e) {
       print('Erro ao buscar CEP: $e');
@@ -126,8 +125,6 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
         Location location = locations.first;
         String mapsUrl =
             'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}';
-
-        // Tentativa direta de abrir o Google Maps
         await launch(mapsUrl);
       } else {
         throw 'Endereço não encontrado';
@@ -166,13 +163,6 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
               child: Text('Abrir no Google Maps'),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _getCurrentLocation();
-                _compareAddresses();
-              },
-              child: Text('Comparar com Localização Atual'),
-            ),
             if (_addressData != null) ...[
               Text('CEP: ${_addressData!.cep}'),
               Text('Logradouro: ${_addressData!.logradouro}'),

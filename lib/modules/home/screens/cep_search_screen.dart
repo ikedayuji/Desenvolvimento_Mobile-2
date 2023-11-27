@@ -71,7 +71,7 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       String addressFromCep = _addressData!.logradouro ?? '';
       String formattedCurrentAddress = _currentAddress!.replaceAll(', ', ',');
       if (addressFromCep.isNotEmpty && formattedCurrentAddress.isNotEmpty) {
-        if (addressFromCep == formattedCurrentAddress) {
+        if (formattedCurrentAddress.contains(addressFromCep)) {
           _showModal('Você está na mesma localização do CEP digitado');
         }
       }

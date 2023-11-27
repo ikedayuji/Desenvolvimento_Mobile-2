@@ -36,7 +36,7 @@ class SplashState extends State<Splash> {
               gradient: LinearGradient(colors: [
                 Color.fromARGB(255, 64, 189, 26),
                 Color.fromARGB(255, 230, 255, 10),
-                Color.fromARGB(255, 0, 247, 255)
+                Color.fromARGB(221, 1, 255, 35)
               ], begin: Alignment.topLeft, end: Alignment.bottomRight),
               /*RadialGradient(
             colors: [

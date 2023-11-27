@@ -14,32 +14,46 @@ class BottomBar extends StatefulWidget {
 class BottomBarState extends State<BottomBar> {
   int abaSelecionada = 0;
 
+  final List<Widget> telas = [
+    Home(),
+    Calc(),
+    Formulario(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Eric App"),
-          centerTitle: true,
-          leading: Icon(Icons.favorite),
-        ),
-        bottomNavigationBar: NavigationBar(
-            selectedIndex: abaSelecionada,
-            // Evento ativado quando uma aba for selecionada
-            // index representa o índice da aba (0 a n-1)
-            onDestinationSelected: (index) {
-              setState(() {
-                abaSelecionada = index;
-              });
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home),
-                label: "Início",
-              ),
-              NavigationDestination(
-                  icon: Icon(Icons.calculate_sharp), label: "Calculadora"),
-              NavigationDestination(icon: Icon(Icons.person), label: "Perfil")
-            ]),
-        body: [Home(), Calc(), Formulario()][abaSelecionada]);
+      appBar: AppBar(
+        title: const Text("Eric App"),
+        centerTitle: true,
+        leading: Icon(Icons.favorite),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: abaSelecionada,
+        onTap: (index) {
+          setState(() {
+            abaSelecionada = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Início",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calculate_sharp),
+            label: "Calculadora",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Perfil",
+          ),
+        ],
+        selectedItemColor: Color.fromARGB(
+            255, 202, 53, 33), // Cor do ícone e rótulo selecionados
+        unselectedItemColor: Color.fromARGB(158, 19, 182, 146),
+      ),
+      body: telas[abaSelecionada],
+    );
   }
 }

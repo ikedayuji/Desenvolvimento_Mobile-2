@@ -21,18 +21,44 @@ class FormularioState extends State<Formulario> {
   final TextEditingController _dobController = TextEditingController();
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfileData();
+  }
+
+  void loadProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('name') ?? '';
+      _cpfController.text = prefs.getString('cpf') ?? '';
+      _emailController.text = prefs.getString('email') ?? '';
+      _phoneController.text = prefs.getString('phone') ?? '';
+      _dobController.text = prefs.getString('dob') ?? '';
+      String imagePath = prefs.getString('imagePath') ?? '';
+      if (imagePath.isNotEmpty) {
+        _image = File(imagePath);
+      }
+    });
+  }
 
   Future getImageFromCamera() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     setState(() {
-      _image = File(pickedFile!.path);
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
     });
   }
 
   Future getImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      _image = File(pickedFile!.path);
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
     });
   }
 
@@ -43,20 +69,25 @@ class FormularioState extends State<Formulario> {
     prefs.setString('email', _emailController.text);
     prefs.setString('phone', _phoneController.text);
     prefs.setString('dob', _dobController.text);
+    if (_image != null) {
+      prefs.setString('imagePath', _image!.path);
+    }
+    _toggleEditing(false);
   }
 
   Future<void> sendEmail() async {
-    final Uri _emailLaunchUri = Uri(
+    final email = _emailController.text;
+    final subject = 'Assunto';
+    final body = 'Corpo do e-mail';
+
+    final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: _emailController.text,
-      queryParameters: {'subject': 'Assunto', 'body': 'Corpo do e-mail'},
+      path: email,
+      queryParameters: {'subject': subject, 'body': body},
     );
+
     try {
-      if (await canLaunch(_emailLaunchUri.toString())) {
-        await launch(_emailLaunchUri.toString());
-      } else {
-        throw 'Could not launch email';
-      }
+      await launch(emailLaunchUri.toString());
     } catch (e) {
       print('Error launching email: $e');
     }
@@ -74,7 +105,8 @@ class FormularioState extends State<Formulario> {
           ),
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: saveProfileData,
+            onPressed:
+                _isEditing ? saveProfileData : () => _toggleEditing(true),
           ),
         ],
       ),
@@ -122,55 +154,42 @@ class FormularioState extends State<Formulario> {
                       _image == null ? Icon(Icons.camera_alt, size: 50) : null,
                 ),
               ),
-              TextField(
-                controller: _nameController,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  hintText: 'Seu nome',
-                  prefixIcon: Icon(Icons.person),
-                ),
-              ),
+              _buildEditableTextField(
+                  _nameController, 'Seu nome', Icons.person),
               SizedBox(height: 15),
-              TextField(
-                controller: _cpfController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'CPF',
-                  prefixIcon: Icon(Icons.article),
-                ),
-              ),
+              _buildEditableTextField(_cpfController, 'CPF', Icons.article),
               SizedBox(height: 15),
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  hintText: 'Telefone',
-                  prefixIcon: Icon(Icons.phone),
-                ),
-              ),
+              _buildEditableTextField(
+                  _phoneController, 'Telefone', Icons.phone),
               SizedBox(height: 15),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'E-mail',
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
+              _buildEditableTextField(_emailController, 'E-mail', Icons.email),
               SizedBox(height: 15),
-              TextField(
-                controller: _dobController,
-                keyboardType: TextInputType.datetime,
-                decoration: InputDecoration(
-                  hintText: 'Data de Nascimento',
-                  prefixIcon: Icon(Icons.calendar_today),
-                ),
-              ),
+              _buildEditableTextField(
+                  _dobController, 'Data de Nascimento', Icons.calendar_today),
               SizedBox(height: 15),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildEditableTextField(
+      TextEditingController controller, String hintText, IconData prefixIcon) {
+    return TextField(
+      enabled: _isEditing,
+      controller: controller,
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(
+        hintText: hintText,
+        prefixIcon: Icon(prefixIcon),
+      ),
+    );
+  }
+
+  void _toggleEditing(bool status) {
+    setState(() {
+      _isEditing = status;
+    });
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart'; // Importe o pacote intl
 
 class Formulario extends StatefulWidget {
   const Formulario({Key? key});
@@ -75,21 +76,20 @@ class FormularioState extends State<Formulario> {
     _toggleEditing(false);
   }
 
-  Future<void> sendEmail() async {
-    final email = _emailController.text;
-    final subject = 'Assunto';
-    final body = 'Corpo do e-mail';
-
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: email,
-      queryParameters: {'subject': subject, 'body': body},
+  Future<void> _selectBirthday() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
 
-    try {
-      await launch(emailLaunchUri.toString());
-    } catch (e) {
-      print('Error launching email: $e');
+    if (picked != null && picked != _dobController.text) {
+      setState(() {
+        // Use o pacote intl para formatar a data
+        final formattedDate = DateFormat('dd/MM/yyyy').format(picked);
+        _dobController.text = formattedDate;
+      });
     }
   }
 
@@ -154,19 +154,43 @@ class FormularioState extends State<Formulario> {
                       _image == null ? Icon(Icons.camera_alt, size: 50) : null,
                 ),
               ),
-              _buildEditableTextField(
-                  _nameController, 'Seu nome', Icons.person),
-              SizedBox(height: 15),
-              _buildEditableTextField(_cpfController, 'CPF', Icons.article),
               SizedBox(height: 15),
               _buildEditableTextField(
-                  _phoneController, 'Telefone', Icons.phone),
-              SizedBox(height: 15),
-              _buildEditableTextField(_emailController, 'E-mail', Icons.email),
+                _nameController,
+                'Seu nome',
+                Icons.person,
+              ),
               SizedBox(height: 15),
               _buildEditableTextField(
-                  _dobController, 'Data de Nascimento', Icons.calendar_today),
+                _cpfController,
+                'CPF',
+                Icons.article,
+              ),
               SizedBox(height: 15),
+              _buildEditableTextField(
+                _phoneController,
+                'Telefone',
+                Icons.phone,
+              ),
+              SizedBox(height: 15),
+              _buildEditableTextField(
+                _emailController,
+                'E-mail',
+                Icons.email,
+              ),
+              SizedBox(height: 15),
+              GestureDetector(
+                onTap: () {
+                  _selectBirthday();
+                },
+                child: AbsorbPointer(
+                  child: _buildEditableTextField(
+                    _dobController,
+                    'Data de Nascimento',
+                    Icons.calendar_today,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -175,7 +199,10 @@ class FormularioState extends State<Formulario> {
   }
 
   Widget _buildEditableTextField(
-      TextEditingController controller, String hintText, IconData prefixIcon) {
+    TextEditingController controller,
+    String hintText,
+    IconData prefixIcon,
+  ) {
     return TextField(
       enabled: _isEditing,
       controller: controller,
@@ -191,5 +218,23 @@ class FormularioState extends State<Formulario> {
     setState(() {
       _isEditing = status;
     });
+  }
+
+  Future<void> sendEmail() async {
+    final email = _emailController.text;
+    final subject = 'Assunto';
+    final body = 'Corpo do e-mail';
+
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {'subject': subject, 'body': body},
+    );
+
+    try {
+      await launch(emailLaunchUri.toString());
+    } catch (e) {
+      print('Error launching email: $e');
+    }
   }
 }

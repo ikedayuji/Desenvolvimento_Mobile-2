@@ -29,7 +29,6 @@ class FormularioState extends State<Formulario> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
   bool _isEditing = false;
-  bool _isDateSelectable = true;
 
   @override
   void initState() {
@@ -76,12 +75,11 @@ class FormularioState extends State<Formulario> {
     prefs.setString('cpf', _cpfController.text);
     prefs.setString('email', _emailController.text);
     prefs.setString('phone', _phoneController.text);
-    prefs.setString('dob', _dobController.text); // Save date of birth
+    prefs.setString('dob', _dobController.text);
     if (_image != null) {
       prefs.setString('imagePath', _image!.path);
     }
     _toggleEditing(false);
-    _isDateSelectable = false;
   }
 
   Future<void> _selectBirthday() async {
@@ -215,12 +213,14 @@ class FormularioState extends State<Formulario> {
     IconData prefixIcon,
   ) {
     return TextField(
-      enabled: _isEditing && _isDateSelectable,
+      readOnly: !_isEditing,
       controller: controller,
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: Icon(prefixIcon),
+        filled: !_isEditing,
+        fillColor: Colors.grey[200],
       ),
     );
   }

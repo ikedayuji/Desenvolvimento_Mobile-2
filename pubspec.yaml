@@ -25,6 +25,7 @@ dependencies:
   provider: ^5.0.0
   http: ^1.1.0
   table_calendar: ^3.0.9
+  mailer: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -35,3 +36,6 @@ flutter:
   uses-material-design: true
   assets:
    - 'assets/images/'
+
+
+  

@@ -82,7 +82,7 @@ class FormularioState extends State<Formulario> {
     _toggleEditing(false);
   }
 
-  Future<void> _selectBirthday() async {
+  Future<void> selectBirthday() async {
     if (!_isEditing) {
       return;
     }
@@ -190,7 +190,7 @@ class FormularioState extends State<Formulario> {
               SizedBox(height: 15),
               GestureDetector(
                 onTap: () {
-                  _selectBirthday();
+                  selectBirthday();
                 },
                 child: AbsorbPointer(
                   child: _buildEditableTextField(
@@ -233,8 +233,14 @@ class FormularioState extends State<Formulario> {
 
   Future<void> sendEmail() async {
     final email = _emailController.text;
-    final subject = 'Assunto';
-    final body = 'Corpo do e-mail';
+    final subject = 'Formulário preenchido';
+    final body = '''
+      Nome: ${_nameController.text}
+      CPF: ${_cpfController.text}
+      E-mail: ${_emailController.text}
+      Telefone: ${_phoneController.text}
+      Data de Nascimento: ${_dobController.text}
+    ''';
 
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',

@@ -29,6 +29,7 @@ class FormularioState extends State<Formulario> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
   bool _isEditing = false;
+  Color backgroundColor = Colors.grey[200]!; // Definição da cor do fundo
 
   @override
   void initState() {
@@ -119,6 +120,7 @@ class FormularioState extends State<Formulario> {
           ),
         ],
       ),
+      backgroundColor: backgroundColor, // Mudança da cor do fundo
       body: Padding(
         padding: const EdgeInsets.all(30),
         child: SingleChildScrollView(
@@ -220,7 +222,7 @@ class FormularioState extends State<Formulario> {
         hintText: hintText,
         prefixIcon: Icon(prefixIcon),
         filled: !_isEditing,
-        fillColor: Colors.grey[200],
+        fillColor: Colors.white,
       ),
     );
   }

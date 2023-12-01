@@ -49,8 +49,7 @@ class BottomBarState extends State<BottomBar> {
             label: "Perfil",
           ),
         ],
-        selectedItemColor: Color.fromARGB(
-            255, 202, 53, 33), // Cor do ícone e rótulo selecionados
+        selectedItemColor: Color.fromARGB(255, 202, 53, 33),
         unselectedItemColor: Color.fromARGB(158, 19, 182, 146),
       ),
       body: telas[abaSelecionada],

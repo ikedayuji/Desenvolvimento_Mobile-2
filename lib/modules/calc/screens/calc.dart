@@ -16,8 +16,9 @@ class CalcState extends State<Calc> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculadora'), // Título da AppBar
+        title: const Text('Calculadora'),
       ),
+      backgroundColor: Colors.grey[200],
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -77,7 +78,7 @@ class CalcState extends State<Calc> {
             child: Text(
               "$myVar",
               style: const TextStyle(
-                color: Color.fromARGB(255, 68, 255, 199),
+                color: Color.fromARGB(255, 13, 140, 199),
                 fontSize: 45.0,
                 fontWeight: FontWeight.bold,
               ),

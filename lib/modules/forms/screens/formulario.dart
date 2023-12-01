@@ -3,7 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart'; // Importe o pacote intl
+import 'package:intl/intl.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: Formulario(),
+  ));
+}
 
 class Formulario extends StatefulWidget {
   const Formulario({Key? key});
@@ -23,6 +29,7 @@ class FormularioState extends State<Formulario> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
   bool _isEditing = false;
+  bool _isDateSelectable = true;
 
   @override
   void initState() {
@@ -69,14 +76,19 @@ class FormularioState extends State<Formulario> {
     prefs.setString('cpf', _cpfController.text);
     prefs.setString('email', _emailController.text);
     prefs.setString('phone', _phoneController.text);
-    prefs.setString('dob', _dobController.text);
+    prefs.setString('dob', _dobController.text); // Save date of birth
     if (_image != null) {
       prefs.setString('imagePath', _image!.path);
     }
     _toggleEditing(false);
+    _isDateSelectable = false;
   }
 
   Future<void> _selectBirthday() async {
+    if (!_isEditing) {
+      return;
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -86,7 +98,6 @@ class FormularioState extends State<Formulario> {
 
     if (picked != null && picked != _dobController.text) {
       setState(() {
-        // Use o pacote intl para formatar a data
         final formattedDate = DateFormat('dd/MM/yyyy').format(picked);
         _dobController.text = formattedDate;
       });
@@ -204,7 +215,7 @@ class FormularioState extends State<Formulario> {
     IconData prefixIcon,
   ) {
     return TextField(
-      enabled: _isEditing,
+      enabled: _isEditing && _isDateSelectable,
       controller: controller,
       keyboardType: TextInputType.text,
       decoration: InputDecoration(

@@ -41,6 +41,8 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       if (permission == LocationPermission.deniedForever) {
         throw 'Permissões de localização negadas permanentemente';
       }
+
+      _getCurrentLocation();
     } catch (e) {
       print('Erro ao verificar permissões de localização: $e');
     }
@@ -59,7 +61,6 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       setState(() {
         _currentAddress =
             '${placemark.thoroughfare}, ${placemark.subThoroughfare}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.administrativeArea}, ${placemark.country}';
-        _compareAddresses();
       });
     } catch (e) {
       print('Erro ao obter localização: $e');
@@ -68,12 +69,13 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
 
   void _compareAddresses() {
     if (_addressData != null && _currentAddress != null) {
-      String addressFromCep = _addressData!.logradouro ?? '';
-      String formattedCurrentAddress = _currentAddress!.replaceAll(', ', ',');
-      if (addressFromCep.isNotEmpty && formattedCurrentAddress.isNotEmpty) {
-        if (formattedCurrentAddress.contains(addressFromCep)) {
-          _showModal('Você está na mesma localização do CEP digitado');
-        }
+      String addressFromCep =
+          _addressData!.logradouro?.replaceAll(RegExp(r'[^\w\s]'), '') ?? '';
+      String currentAddressClean =
+          _currentAddress!.replaceAll(RegExp(r'[^\w\s]'), '');
+
+      if (addressFromCep.isNotEmpty && currentAddressClean == addressFromCep) {
+        _showModal('Você está na mesma localização do CEP digitado');
       }
     }
   }
@@ -106,8 +108,8 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       Cep cepData = await CepRepository().fetchCep(cep);
       setState(() {
         _addressData = cepData;
-        _getCurrentLocation();
       });
+      _compareAddresses();
     } catch (e) {
       print('Erro ao buscar CEP: $e');
     }

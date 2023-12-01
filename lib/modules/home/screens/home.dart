@@ -3,23 +3,22 @@ import '../../tasks/screens/main_task.dart';
 import '../../users/screens/usuarios.dart';
 import 'cep_search_screen.dart';
 
-class Home extends StatefulWidget {
+class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
-  State<Home> createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Menu Principal'),
+      ),
+      backgroundColor: Colors.grey[200],
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: [
-          ListTile(
-            leading: const Icon(Icons.task),
-            title: const Text("Lista de tarefas"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+          _buildListItem(
+            icon: Icons.task,
+            title: 'Lista de Tarefas',
             onTap: () {
               Navigator.push(
                 context,
@@ -27,24 +26,21 @@ class _HomeState extends State<Home> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.people_alt),
-            title: const Text("Lista de usuários"),
-            subtitle: const Text("Pessoas cadastradas"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+          _buildListItem(
+            icon: Icons.people_alt,
+            title: 'Lista de Usuários',
+            subtitle: 'Pessoas cadastradas',
             onTap: () {
-              print("Você tocou na lista");
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => Usuarios()),
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.location_on),
-            title: const Text("Buscar CEP"),
-            subtitle: const Text("Encontre informações de endereço"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+          _buildListItem(
+            icon: Icons.location_on,
+            title: 'Buscar CEP',
+            subtitle: 'Encontre informações de endereço',
             onTap: () {
               Navigator.push(
                 context,
@@ -52,24 +48,40 @@ class _HomeState extends State<Home> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.photo),
-            title: const Text("Álbum de fotos"),
-            subtitle: const Text("Visualização de imagens"),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              print("Você tocou na lista");
-            },
+          _buildListItem(
+            icon: Icons.photo,
+            title: 'Álbum de Fotos',
+            subtitle: 'Visualização de imagens',
+            onTap: () {},
           ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text("Configurações"),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              print("Você tocou na lista");
-            },
-          )
+          _buildListItem(
+            icon: Icons.settings,
+            title: 'Configurações',
+            onTap: () {},
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildListItem({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    VoidCallback? onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: ListTile(
+          leading: Icon(icon),
+          title: Text(title),
+          subtitle: subtitle != null ? Text(subtitle) : null,
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
       ),
     );
   }

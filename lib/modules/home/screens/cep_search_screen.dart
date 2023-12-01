@@ -67,15 +67,17 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
     }
   }
 
-  void _compareAddresses() {
+  Future<void> _compareAddresses() async {
     if (_addressData != null && _currentAddress != null) {
-      String addressFromCep =
-          _addressData!.logradouro?.replaceAll(RegExp(r'[^\w\s]'), '') ?? '';
-      String currentAddressClean =
-          _currentAddress!.replaceAll(RegExp(r'[^\w\s]'), '');
+      String addressFromCep = _addressData!.logradouro?.toLowerCase() ?? '';
+      String currentAddress = _currentAddress!.toLowerCase();
 
-      if (addressFromCep.isNotEmpty && currentAddressClean == addressFromCep) {
-        _showModal('Você está na mesma localização do CEP digitado');
+      if (addressFromCep.isNotEmpty && currentAddress.isNotEmpty) {
+        bool addressesMatch = addressFromCep == currentAddress;
+        String message = addressesMatch
+            ? 'Você está na mesma localização do CEP digitado'
+            : 'Você não está na mesma localização do CEP digitado';
+        _showModal(message);
       }
     }
   }
@@ -109,7 +111,6 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
       setState(() {
         _addressData = cepData;
       });
-      _compareAddresses();
     } catch (e) {
       print('Erro ao buscar CEP: $e');
     }
@@ -163,6 +164,15 @@ class _CepSearchScreenState extends State<CepSearchScreen> {
                 await _abrirGoogleMaps();
               },
               child: Text('Abrir no Google Maps'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _getCurrentLocation().then((_) {
+                  _compareAddresses();
+                });
+              },
+              child: Text('Comparar Endereços'),
             ),
             SizedBox(height: 20),
             if (_addressData != null) ...[
